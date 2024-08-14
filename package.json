@@ -1,0 +1,24 @@
+{
+	"name": "genai-for-developer",
+	"version": "1.0.0",
+	"main": "server.js",
+	"scripts": {
+		"test": "vitest",
+		"start": "node --env-file=.env --watch server.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"description": "",
+	"type": "module",
+	"dependencies": {
+		"@hono/node-server": "1.11.2",
+		"dotenv": "^16.4.5",
+		"hono": "4.4.4",
+		"node-fetch": "^3.3.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.8.0",
+		"vitest": "1.6.0"
+	}
+}

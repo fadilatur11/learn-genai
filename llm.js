@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 // import axios from 'axios';
-import {extractTopic} from "./external-api.js"
+import {extractTopic, getNews} from "./external-api.js"
 
 dotenv.config();
 

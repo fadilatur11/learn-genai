@@ -4,120 +4,10 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sera assistant</title>
-</head>
-
-<body class="full-h">
-    <main id="chat">
-    </main>
-    <footer>
-        <div class="input-container">
-            <input type="text" id="prompt" autocomplete="off" autofocus placeholder="Ask something"></textarea>
-        </div>
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const $ = (id) => document.getElementById(id);
-
-            const $div = (cls) => {
-                const el = document.createElement('div');
-                el.setAttribute('class', cls);
-                return el;
-            }
-
-            function message(type, text) {
-                const el = $div(`speech-bubble-${type} color-${type}`);
-                el.innerText = text || '';
-                const wrapper = $div(`speech speech-${type}`);
-                wrapper.appendChild(el);
-                $('chat').appendChild(wrapper);
-                wrapper.classList.toggle('fade-in');
-                setTimeout(() => {
-                    el.scrollIntoView({ behavior: 'smooth' });
-                }, 0);
-            }
-
-            const isTouchDevice = () => 'ontouchstart' in window;
-
-            // On a device with touch support (read: mobile), do not autofocus
-            // since it'll annoyingly trigger the on-screen keyboard
-            function focusInput() {
-                if (!isTouchDevice()) {
-                    $('prompt').focus();
-                }
-            }
-
-            function ask(question, completed) {
-                message('human', question);
-                $('prompt').blur();
-                const url = '/chat?q=' + encodeURIComponent(question);
-                fetch(url).then(response => {
-                    if (response.status !== 200) {
-                        throw new Error('Unable to get an answer!')
-                    }
-                    return response.text();
-                }).then(answer => {
-                    console.log('Answer:', answer);
-                    message('assistant', answer);
-                    focusInput();
-                    completed && completed(answer);
-                }).catch(error => {
-                    message('panic', error);
-                });
-            }
-
-            $('prompt').addEventListener('keydown', function handleKeyInput(event) {
-                if (event.key === 'Enter') {
-                    const el = $('prompt');
-                    const question = el.value.trim();
-                    if (question.length > 0) {
-                        ask(question);
-                        el.value = '';
-                    }
-                }
-            });
-
-            setTimeout(() => {
-                // message('assistant', 'Hi, this is Pico Jarvis!');
-            }, 0);
-
-            const tests = [
-                'Who is the CEO of Google?',
-                'What is a dwarf planet?',
-                'Give an example!',
-                'List all terrestrial planets',
-                'Which is the closest to the Sun?',
-                'Which planet known as the red one?',
-                'How many satellites does Jupiter have?',
-                'How about Saturn?',
-                'and Neptune?',
-                'When was solar system formed?',
-                'What materials compose the gas giants?',
-                'What about the ice giants',
-                'Explain the heliopause',
-                'When did Voyager 2 enter the interstellar space?',
-                'and Voyager 1?'
-            ];
-
-            function verify() {
-                const question = tests.shift();
-                if (question && question.length > 0) {
-                    ask(question, (answer) => {
-                        setTimeout(() => { ask('!source') }, 1000);
-                        setTimeout(verify, 2000);
-                    });
-                }
-            }
-
-            // setTimeout(verify, 1000);
-        });
-    </script>
-
     <style>
         html {
             line-height: 1.5;
-            background-color: rgb(29, 35, 42);
+            background-color: #2d3436;
             font-family: ui-sans-serif, system-ui, -apple-system,
                 BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
                 Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
@@ -237,7 +127,7 @@
             width: 0;
             height: 0;
             border: 1em solid transparent;
-            border-right-color: rgb(31, 178, 166);
+            border-right-color: #34495e;
             border-left: 0;
             border-bottom: 0;
             margin-top: -0.5em;
@@ -275,7 +165,7 @@
         }
 
         .color-assistant {
-            background-color: rgb(31, 178, 166);
+            background-color: #34495e;
             color: white
         }
 
@@ -296,7 +186,233 @@
             bottom: 2px;
             padding: 0px;
         }
+
+        /* Gaya untuk animasi loading */
+        .loading-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 3rem;
+            margin: 1rem 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #ebe7e7;
+            width: 1em;
+            height: 1em;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+        }
+
+        .typing-indicator .dot {
+            width: 0.5em;
+            height: 0.5em;
+            margin: 0 0.2em;
+            border-radius: 50%;
+            background: #ebe7e7;
+            animation: blink 1.4s infinite both;
+        }
+
+        .typing-indicator .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% {
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+        }
+        .typing-indicator {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.typing-indicator .dot {
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.2em;
+    border-radius: 50%;
+    background: #ebe7e7;
+    animation: typing 1.5s infinite;
+}
+
+.typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
     </style>
+</head>
+
+<body class="full-h">
+    <main id="chat">
+    </main>
+    <footer>
+        <div class="input-container">
+            <input type="text" id="prompt" autocomplete="off" autofocus placeholder="Ask something"></textarea>
+        </div>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+    const $ = (id) => document.getElementById(id);
+    const $div = (cls) => {
+        const el = document.createElement('div');
+        el.setAttribute('class', cls);
+        return el;
+    };
+
+    function showTyping() {
+        const typingIndicator = $div('typing-indicator');
+        typingIndicator.innerHTML = `
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        `;
+        $('chat').appendChild(typingIndicator);
+    }
+
+    function hideTyping() {
+        const typingIndicator = document.querySelector('.typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    function message(type, text) {
+        if (type === 'assistant') {
+            showTyping(); // Show typing indicator
+            setTimeout(() => {
+                hideTyping(); // Hide typing indicator
+                const el = $div(`speech-bubble-${type} color-${type}`);
+                el.innerHTML = text || ''; // Use innerHTML
+                const wrapper = $div(`speech speech-${type}`);
+                wrapper.appendChild(el);
+                $('chat').appendChild(wrapper);
+                wrapper.classList.toggle('fade-in');
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                }, 0);
+            }, 1000); // Simulate typing delay
+        } else {
+            const el = $div(`speech-bubble-${type} color-${type}`);
+            el.innerHTML = text || ''; // Use innerHTML
+            const wrapper = $div(`speech speech-${type}`);
+            wrapper.appendChild(el);
+            $('chat').appendChild(wrapper);
+            wrapper.classList.toggle('fade-in');
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }, 0);
+        }
+    }
+
+    function focusInput() {
+        if (!('ontouchstart' in window)) {
+            $('prompt').focus();
+        }
+    }
+
+    function ask(question, completed) {
+        message('human', question);
+        $('prompt').blur();
+        const url = '/chat?q=' + encodeURIComponent(question);
+        showTyping(); // Show typing indicator
+        fetch(url).then(response => {
+            if (response.status !== 200) {
+                throw new Error('Unable to get an answer!');
+            }
+            return response.text();
+        }).then(answer => {
+            hideTyping(); // Hide typing indicator
+            console.log('Answer:', answer);
+            message('assistant', answer);
+            focusInput();
+            completed && completed(answer);
+        }).catch(error => {
+            hideTyping(); // Hide typing indicator on error
+            message('panic', error);
+        });
+    }
+
+    $('prompt').addEventListener('keydown', function handleKeyInput(event) {
+        if (event.key === 'Enter') {
+            const el = $('prompt');
+            const question = el.value.trim();
+            if (question.length > 0) {
+                ask(question);
+                el.value = '';
+            }
+        }
+    });
+
+    setTimeout(() => {
+        // message('assistant', 'Hi, this is Pico Jarvis!');
+    }, 0);
+
+    const tests = [
+        'Who is the CEO of Google?',
+        'What is a dwarf planet?',
+        'Give an example!',
+        'List all terrestrial planets',
+        'Which is the closest to the Sun?',
+        'Which planet known as the red one?',
+        'How many satellites does Jupiter have?',
+        'How about Saturn?',
+        'and Neptune?',
+        'When was solar system formed?',
+        'What materials compose the gas giants?',
+        'What about the ice giants',
+        'Explain the heliopause',
+        'When did Voyager 2 enter the interstellar space?',
+        'and Voyager 1?'
+    ];
+
+    function verify() {
+        const question = tests.shift();
+        if (question && question.length > 0) {
+            ask(question, (answer) => {
+                setTimeout(() => { ask('!source') }, 1000);
+                setTimeout(verify, 2000);
+            });
+        }
+    }
+
+    // setTimeout(verify, 1000);
+});
+
+    </script>
 
 </body>
 
